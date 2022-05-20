@@ -14,56 +14,61 @@ export function App () {
   const [status, setStatus] = useState("idle");
   const [error, setError] = useState(null);
   const [showModal, setShowModal] = useState(false);
-  useEffect(() => {
-    const API_KEY = '25728701-c83c0487db4f1d7b899af3be5';
-    const API_GET = 'https://pixabay.com/api/?';        
-      setStatus('pending');
-      fetch(
+  const API_KEY = '25728701-c83c0487db4f1d7b899af3be5';
+  const API_GET = 'https://pixabay.com/api/?'; 
+  const findImage = () => {
+    fetch(
+      `${API_GET}q=${imgName}&key=${API_KEY}&page=${page}&image_type=photo&orientation=horizontal&per_page=12`
+    )
+      .then(res => {
+        if (res.ok) {
+          return res.json();
+        }
+        return Promise.reject(
+          new Error(`Ничего не найдено по запросу ${imgName}`)
+        );
+      })
+      .then(res => {
+        if (res.hits.length === 0) {
+          return (setError(`Ничего не найдено по запросу ${imgName}`),
+            setStatus('rejected'))
+        }
+        return (setImgArray(res.hits.map(({ id, webformatURL, largeImageURL }) => ({ id, webformatURL, largeImageURL }))), setStatus('resolved'));
+      })
+      .catch(err => {
+        return (setError(err), setStatus('rejected'));
+      });
+  };
+  const findImageAxios = () => {
+    axios
+      .get(
         `${API_GET}q=${imgName}&key=${API_KEY}&page=${page}&image_type=photo&orientation=horizontal&per_page=12`
       )
-        .then(res => {
-          if (res.ok) {
-            return res.json();
-          }
-          return Promise.reject(
-            new Error(`Ничего не найдено по запросу ${imgName}`)
-          );
-        })
-        .then(res => {
-          if (res.hits.length === 0) {
-            return (setError(`Ничего не найдено по запросу ${imgName}`),
-                    setStatus('rejected'))            
-          }
-          return (setImgArray(res.hits.map(({ id, webformatURL, largeImageURL }) => ({ id, webformatURL, largeImageURL }))), setStatus('resolved'));          
-        })
-        .catch(err => {
-          return (setError(err),setStatus('rejected'));          
-        });
-      setPage(page + 1);    
+      .then(res => {
+        const { total, hits } = res.data;
+        if (total !== imgArray.length) {
+          return (setImgArray([...imgArray, ...hits.map(({ id, webformatURL, largeImageURL }) => ({ id, webformatURL, largeImageURL }))]), setStatus("resolved"));
+        }
+        return setStatus('resolveWithoutButton')
+      })
+      .catch(err => {
+        return (setError(err), setStatus('rejected'));
+      });
+  };
+  useEffect(() => {    
+    if(!imgName){return}
+    setStatus('pending');
+    findImage();
+    setPage(page + 1);    
   }, [imgName]);    
   const submitHandler = value => {
     setImgName(value);
     setPage(1);      
   };
-  const handleButton = () => {
-    const API_KEY = '25728701-c83c0487db4f1d7b899af3be5';
-    const API_GET = 'https://pixabay.com/api/?';
+  const handleButton = () => {    
     setStatus('pending');    
-    setPage(page+1);           
-      axios
-        .get(
-          `${API_GET}q=${imgName}&key=${API_KEY}&page=${page}&image_type=photo&orientation=horizontal&per_page=12`
-        )
-        .then(res => {
-          const { total, hits } = res.data;          
-          if (total !== imgArray.length) {
-            return (setImgArray([...imgArray, ...hits.map(({ id, webformatURL, largeImageURL }) => ({ id, webformatURL, largeImageURL }))]), setStatus("resolved"));            
-          }
-          return setStatus('resolveWithoutButton')          
-        })
-        .catch(err => {          
-          return (setError(err), setStatus('rejected'));
-        });
+    setPage(page + 1);   
+    findImageAxios();     
   };
   const handleForModal = e => {
     setLargeImg(e.target.alt);
