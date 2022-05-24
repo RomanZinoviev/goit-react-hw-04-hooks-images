@@ -19,7 +19,8 @@ export function App () {
     if(!imgName){return}
     setStatus('pending');
     findImage(imgName, page, imgArray, setError, setStatus, setImgArray);        
-  }, [imgArray, imgName, page]);    
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [imgName, page]);    
   const submitHandler = value => {
     setImgName(value);
     setPage(1);      

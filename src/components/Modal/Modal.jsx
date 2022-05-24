@@ -1,9 +1,9 @@
 import {  useEffect } from 'react';
-import { createPortal } from 'react-dom';
+// import { createPortal } from 'react-dom';
 import s from "../Modal/Modal.module.css";
 import PropTypes from 'prop-types';
 
-const modalRoot = document.querySelector("#modal-root")
+// const modalRoot = document.querySelector("#modal-root")
 export function Modal ({onClose, largeImg}) {
   useEffect(() => {
     const handleKeyDown= (e)=> {
@@ -26,11 +26,11 @@ export function Modal ({onClose, largeImg}) {
       onClose();
     }
   };  
-    return createPortal(<div className={s.overlay} onClick={handleForCloseModal}>
+    return (<div className={s.overlay} onClick={handleForCloseModal}>
         <div className={s.modal}>
           <img src={largeImg} alt="photoImg" />
         </div>
-      </div>, modalRoot);
+      </div>);
 };
 Modal.propTypes = {
     onClose: PropTypes.func.isRequired,
