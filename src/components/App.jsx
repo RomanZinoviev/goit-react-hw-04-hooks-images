@@ -19,7 +19,7 @@ export function App () {
     if(!imgName){return}
     setStatus('pending');
     findImage(imgName, page, imgArray, setError, setStatus, setImgArray);        
-  }, [imgName, page]);    
+  }, [imgArray, imgName, page]);    
   const submitHandler = value => {
     setImgName(value);
     setPage(1);      
