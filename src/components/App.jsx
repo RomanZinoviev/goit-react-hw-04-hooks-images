@@ -17,8 +17,28 @@ export function App () {
   
   useEffect(() => {    
     if(!imgName){return}
-    setStatus('pending');
-    findImage(imgName, page, imgArray, setError, setStatus, setImgArray);        
+    setStatus('pending');    
+    findImage(imgName, page).then(res => {  
+      const makeArr = (res) => {
+        return res.hits.map(({ id, webformatURL, largeImageURL }) => ({ id, webformatURL, largeImageURL }))
+      };
+        if (res.hits.length === 0&&res.total===0) {
+          return (setError(`Ничего не найдено по запросу ${imgName}`),
+            setStatus('rejected'))
+        };
+        if (page!==1) {
+          if (res.total && res.hits.length !== 0) {
+            return (
+              setImgArray([...imgArray, ...makeArr(res)]), setStatus("resolved")
+            );
+          };
+          return setStatus('resolveWithoutButton');          
+        };
+        return (setImgArray(makeArr(res)), setStatus('resolved'));
+      })
+      .catch(err => {
+        return (setError(err), setStatus('rejected'));
+      });;        
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [imgName, page]);    
   const submitHandler = value => {
